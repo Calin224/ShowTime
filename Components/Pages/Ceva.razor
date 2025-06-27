@@ -1,7 +1,42 @@
 ﻿@page "/ceva"
+@using Microsoft.EntityFrameworkCore
+@using STime.Data
+@using STime.Entities
+@inject DataContext context
 
-<MudDatePicker Label="Basic example" @bind-Date="_date"/>
+@if (festivals != null && festivals.Any())
+{
+    <MudGrid Spacing="@Spacing" Justify="Justify.Center">
+        @foreach (var festival in festivals)
+        {
+            <MudItem>
+                @festival.Name
+            </MudItem>
+            <MudItem>
+                @festival.Description
+            </MudItem>
+        }
+    </MudGrid>
+}
+else
+{
+    <p>Nu există festivaluri disponibile.</p>
+}
 
 @code {
-    private DateTime? _date = DateTime.Today;
+    public int Spacing { get; set; } = 6;
+
+    List<Festival> festivals = new List<Festival>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            festivals = await context.Festivals.ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Eroare la încărcarea festivalurilor: {ex.Message}");
+        }
+    }
 }
