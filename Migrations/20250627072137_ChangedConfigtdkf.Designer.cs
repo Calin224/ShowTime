@@ -12,8 +12,8 @@ using STime.Data;
 namespace STime.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250627062654_AddedConfig")]
-    partial class AddedConfig
+    [Migration("20250627072137_ChangedConfigtdkf")]
+    partial class ChangedConfigtdkf
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -72,6 +72,9 @@ namespace STime.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Location")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -80,12 +83,15 @@ namespace STime.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<TimeSpan>("Period")
-                        .HasColumnType("time");
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Festivals");
+                    b.ToTable("Festivals", t =>
+                        {
+                            t.HasCheckConstraint("CK_Festival_StartDate_Future", "StartDate > GETDATE()");
+                        });
                 });
 
             modelBuilder.Entity("BandFestival", b =>

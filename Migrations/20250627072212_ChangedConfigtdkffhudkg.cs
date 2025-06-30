@@ -5,7 +5,7 @@
 namespace STime.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class ChangedConfigtdkffhudkg : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

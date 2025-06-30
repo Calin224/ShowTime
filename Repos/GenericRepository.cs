@@ -25,6 +25,11 @@ public class GenericRepository<T>(DataContext context) : IGenericRepository<T> w
         context.Set<T>().Remove(entity);
     }
 
+    public async Task AddAsync(T entity)
+    {
+        await context.Set<T>().AddAsync(entity);
+    }
+
     public bool Exists(int id)
     {
         return context.Set<T>().Any(x => x.Id == id);

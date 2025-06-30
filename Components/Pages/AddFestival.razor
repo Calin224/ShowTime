@@ -1,0 +1,67 @@
+﻿@page "/add-festival"
+@using STime.Entities
+@using STime.Interfaces
+@using STime.Repos
+@inject IRepositoryFestival repo
+@inject NavigationManager navigationManager
+
+<h3>Add Festival</h3>
+
+<MudCard>
+    <MudForm Model="@Festival">
+        <MudCardContent>
+            <MudTextField @bind-Value="Festival.Name" 
+                          Immediate="true"
+                          Label="Name"></MudTextField>
+            <MudTextField @bind-Value="Festival.Location"
+                          Immediate="true"
+                          Label="Location"></MudTextField>
+            
+            <MudTextField @bind-Value="Festival.Description"
+                          Immediate="true"
+                          Label="Description"></MudTextField>
+            
+            <MudDatePicker @bind-Date="Festival.StartDate" Label="Start date" />
+            <MudDatePicker @bind-Date="Festival.EndDate" Label="End date" />
+            
+            <MudButton Variant="Variant.Filled" @onclick="AddFestivalEvent">Submit</MudButton>
+            
+            @if (s == true)
+            {
+                <MudAlert Severity="Severity.Success">Festivalul a fost adaugat cu succes!</MudAlert>
+            }
+        </MudCardContent>
+    </MudForm>
+</MudCard>
+
+@code {
+    public Festival Festival { get; set; } = new Festival()
+    {
+        Location = string.Empty,
+        Name = string.Empty,
+        Description = string.Empty,
+        StartDate = null,
+        EndDate = null
+    };
+
+    private bool s = false;
+
+    private async Task AddFestivalEvent()
+    {
+        try
+        {
+            repo.Add(Festival);
+            if (await repo.SaveAsync())
+                s = true;
+
+            Festival = new Festival() { Location = string.Empty, Name = string.Empty, Description = string.Empty };
+
+            await Task.Delay(1000);
+            navigationManager.NavigateTo("/festivals");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error adding festival: {ex.Message}");
+        }
+    }
+}

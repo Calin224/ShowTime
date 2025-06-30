@@ -1,0 +1,32 @@
+﻿@page "/band-list"
+@using STime.Entities
+@using STime.Interfaces
+@inject IRepositoryBand repo
+
+<h3>BandList</h3>
+
+
+<MudDataGrid Items="@Bands">
+    <Columns>
+        <PropertyColumn Property="x => x.Id"></PropertyColumn>
+        <PropertyColumn Property="x => x.Name"></PropertyColumn>
+        <PropertyColumn Property="x => x.Genre"></PropertyColumn>
+    </Columns>
+</MudDataGrid>
+
+@code {
+    IReadOnlyList<Band> Bands = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Bands = await repo.ListAllAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Eroare la încărcarea trupelor: {ex.Message}");
+        }
+    }
+
+}

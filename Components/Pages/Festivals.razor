@@ -1,0 +1,43 @@
+﻿@page "/festivals"
+@using Microsoft.EntityFrameworkCore
+@using STime.Data
+@using STime.Entities
+@using STime.Interfaces
+@inject DataContext context
+@inject IRepositoryFestival repo
+
+@if (festivals != null && festivals.Any())
+{
+    <MudDataGrid Items="festivals">
+        <Columns>
+            <PropertyColumn Property="x => x.Id"></PropertyColumn>
+            <PropertyColumn Property="x => x.Name"></PropertyColumn>
+            <PropertyColumn Property="x => x.Location"></PropertyColumn>
+            <PropertyColumn Property="x => x.StartDate"></PropertyColumn>
+            <PropertyColumn Property="x => x.EndDate"></PropertyColumn>
+            
+        </Columns>
+    </MudDataGrid>
+}
+else
+{
+    <p>Nu există festivaluri disponibile.</p>
+}
+
+@code {
+    public int Spacing { get; set; } = 6;
+
+    IReadOnlyList<Festival> festivals = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            festivals = await repo.ListAllAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Eroare la încărcarea festivalurilor: {ex.Message}");
+        }
+    }
+}

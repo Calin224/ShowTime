@@ -2,6 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 using STime.Components;
 using STime.Data;
+using STime.Interfaces;
+using STime.Repos;
+using STime.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +19,11 @@ builder.Services.AddDbContext<DataContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+
+builder.Services.AddScoped<IRepositoryBand, RepositoryBand>();
+builder.Services.AddScoped<IRepositoryFestival, RepositoryFestival>();
+builder.Services.AddScoped<IRepositoryBooking, RepositoryBooking>();
+builder.Services.AddScoped<IPhotoService, PhotoService>();
 
 var app = builder.Build();
 

@@ -1,0 +1,55 @@
+﻿@page "/add-band"
+@using STime.Entities
+@using STime.Enums
+@using STime.Interfaces
+@inject IRepositoryBand repo
+@inject NavigationManager navigationManager
+
+<h3>Add Band</h3>
+
+<MudCard>
+    <MudForm Model="@Band">
+        <MudCardContent>
+            <MudTextField @bind-Value="Band.Name" Immediate="true" Label="Name"></MudTextField>
+            
+            <MudSelect T="Genre" @bind-Value="Band.Genre">
+                @foreach (Genre state in Enum.GetValues(typeof(Genre)))
+                {
+                    <MudSelectItem T="Genre" Value="@state">@state</MudSelectItem>
+                }
+            </MudSelect>
+            
+            <MudButton Variant="Variant.Filled" @onclick="AddBandEvent">Submit</MudButton>
+        </MudCardContent>
+    </MudForm>
+</MudCard>
+
+@code {
+
+    public Band Band { get; set; } = new Band
+    {
+        Name = string.Empty,
+        Genre = 0
+    };
+
+    private bool s = false;
+
+    private async Task AddBandEvent()
+    {
+        try
+        {
+            repo.Add(Band);
+            if (await repo.SaveAsync())
+                s = true;
+
+            Band = new Band() { Name = string.Empty, Genre = 0};
+
+            await Task.Delay(1000);
+            navigationManager.NavigateTo("/band-list");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error adding festival: {ex.Message}");
+        }
+    }
+}

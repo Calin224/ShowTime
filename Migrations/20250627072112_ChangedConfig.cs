@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace STime.Migrations
 {
     /// <inheritdoc />
-    public partial class AddedFestival : Migration
+    public partial class ChangedConfig : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -26,19 +26,21 @@ namespace STime.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Festival",
+                name: "Festivals",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Location = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Period = table.Column<TimeSpan>(type: "time", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(100)", nullable: false),
+                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Festival", x => x.Id);
+                    table.PrimaryKey("PK_Festivals", x => x.Id);
+                    table.CheckConstraint("CK_Festival_StartDate_Future", "StartDate > GETDATE()");
                 });
 
             migrationBuilder.CreateTable(
@@ -58,9 +60,9 @@ namespace STime.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_BandFestival_Festival_FestivalsId",
+                        name: "FK_BandFestival_Festivals_FestivalsId",
                         column: x => x.FestivalsId,
-                        principalTable: "Festival",
+                        principalTable: "Festivals",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -81,7 +83,7 @@ namespace STime.Migrations
                 name: "Band");
 
             migrationBuilder.DropTable(
-                name: "Festival");
+                name: "Festivals");
         }
     }
 }

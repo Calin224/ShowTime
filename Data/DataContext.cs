@@ -8,6 +8,9 @@ namespace STime.Data;
 public class DataContext(DbContextOptions<DataContext> options) : DbContext(options)
 {
     public DbSet<Festival> Festivals { get; set; }
+    public DbSet<Band> Bands { get; set; }
+    public DbSet<Booking> Bookings { get; set; }
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
