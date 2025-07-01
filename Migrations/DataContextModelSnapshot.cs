@@ -45,8 +45,8 @@ namespace STime.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Genre")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Genre")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -54,7 +54,7 @@ namespace STime.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Band");
+                    b.ToTable("Bands");
                 });
 
             modelBuilder.Entity("STime.Entities.Booking", b =>
@@ -82,7 +82,7 @@ namespace STime.Migrations
 
                     b.HasIndex("FestivalId");
 
-                    b.ToTable("Booking");
+                    b.ToTable("Bookings");
                 });
 
             modelBuilder.Entity("STime.Entities.Festival", b =>
@@ -97,7 +97,7 @@ namespace STime.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("EndDate")
+                    b.Property<DateTime?>("EndDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Location")
@@ -117,6 +117,32 @@ namespace STime.Migrations
                         {
                             t.HasCheckConstraint("CK_Festival_StartDate_Future", "StartDate > GETDATE()");
                         });
+                });
+
+            modelBuilder.Entity("STime.Entities.FestivalPhoto", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("FestivalId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PublicId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FestivalId")
+                        .IsUnique();
+
+                    b.ToTable("FestivalPhoto");
                 });
 
             modelBuilder.Entity("BandFestival", b =>
@@ -145,9 +171,22 @@ namespace STime.Migrations
                     b.Navigation("Festival");
                 });
 
+            modelBuilder.Entity("STime.Entities.FestivalPhoto", b =>
+                {
+                    b.HasOne("STime.Entities.Festival", "Festival")
+                        .WithOne("FestivalPhoto")
+                        .HasForeignKey("STime.Entities.FestivalPhoto", "FestivalId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Festival");
+                });
+
             modelBuilder.Entity("STime.Entities.Festival", b =>
                 {
                     b.Navigation("Bookings");
+
+                    b.Navigation("FestivalPhoto");
                 });
 #pragma warning restore 612, 618
         }

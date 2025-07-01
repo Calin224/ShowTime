@@ -16,6 +16,23 @@
             <PropertyColumn Property="x => x.StartDate"></PropertyColumn>
             <PropertyColumn Property="x => x.EndDate"></PropertyColumn>
             
+            <TemplateColumn Title="Bands">
+                <CellTemplate>
+                    @if (context.Item.Bands != null && context.Item.Bands.Any())
+                    {
+                        <div>
+                            @foreach (var band in context.Item.Bands)
+                            {
+                                <MudChip Size="Size.Small" Color="Color.Primary" Class="ma-1">@band.Name (@band.Genre)</MudChip>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.caption" Class="text-muted">No bands</MudText>
+                    }
+                </CellTemplate>
+            </TemplateColumn>
         </Columns>
     </MudDataGrid>
 }
@@ -33,7 +50,7 @@ else
     {
         try
         {
-            festivals = await repo.ListAllAsync();
+            festivals = await repo.IncludeBands();
         }
         catch (Exception ex)
         {

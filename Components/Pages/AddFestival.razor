@@ -1,9 +1,10 @@
 ﻿@page "/add-festival"
 @using STime.Entities
 @using STime.Interfaces
-@using STime.Repos
+
 @inject IRepositoryFestival repo
 @inject NavigationManager navigationManager
+@inject IRepositoryBand repoBand
 
 <h3>Add Festival</h3>
 
@@ -23,6 +24,49 @@
             
             <MudDatePicker @bind-Date="Festival.StartDate" Label="Start date" />
             <MudDatePicker @bind-Date="Festival.EndDate" Label="End date" />
+            
+            <MudText Typo="Typo.h6" Class="mt-4 mb-2">Select Bands</MudText>
+            
+            @if (availableBands != null && availableBands.Any())
+            {
+                <MudSelect T="int" Label="Add Band" @bind-Value="selectedBandId" 
+                           Placeholder="Choose a band to add">
+                    @foreach (var band in availableBands.Where(b => !selectedBands.Contains(b.Id)))
+                    {
+                        <MudSelectItem Value="@band.Id">@band.Name (@band.Genre)</MudSelectItem>
+                    }
+                </MudSelect>
+                
+                <MudButton Variant="Variant.Outlined" 
+                           Color="Color.Primary" 
+                           @onclick="AddBandToFestival"
+                           Disabled="@(selectedBandId == 0)"
+                           Class="mt-2">
+                    Add Band
+                </MudButton>
+            }
+            
+            @if (selectedBands.Any())
+            {
+                <MudText Typo="Typo.h6" Class="mt-4 mb-2">Selected Bands</MudText>
+                <MudPaper Class="pa-2">
+                    @foreach (var bandId in selectedBands)
+                    {
+                        var band = availableBands?.FirstOrDefault(b => b.Id == bandId);
+                        if (band != null)
+                        {
+                            <div class="d-flex justify-space-between align-center pa-2">
+                                <MudText>@band.Name (@band.Genre)</MudText>
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete" 
+                                               Color="Color.Error" 
+                                               Size="Size.Small"
+                                               @onclick="() => RemoveBandFromFestival(bandId)" />
+                            </div>
+                            <MudDivider />
+                        }
+                    }
+                </MudPaper>
+            }
             
             <MudButton Variant="Variant.Filled" @onclick="AddFestivalEvent">Submit</MudButton>
             
@@ -45,16 +89,49 @@
     };
 
     private bool s = false;
+    private IReadOnlyList<Band>? availableBands;
+    private List<int> selectedBands = new List<int>();
+    private int selectedBandId = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        availableBands = await repoBand.ListAllAsync();
+    }
+
+    private void AddBandToFestival()
+    {
+        if (selectedBandId > 0 && !selectedBands.Contains(selectedBandId))
+        {
+            selectedBands.Add(selectedBandId);
+            selectedBandId = 0;
+        }   
+    }
+
+    private void RemoveBandFromFestival(int bandId)
+    {
+        selectedBands.Remove(bandId);
+    }
 
     private async Task AddFestivalEvent()
     {
         try
         {
             repo.Add(Festival);
+
+            if (selectedBands.Any())
+            {
+                var bandsToAdd = availableBands?.Where(b => selectedBands.Contains(b.Id)).ToList();
+                if (bandsToAdd != null)
+                {
+                    Festival.Bands = bandsToAdd;
+                }
+            }
+            
             if (await repo.SaveAsync())
                 s = true;
 
             Festival = new Festival() { Location = string.Empty, Name = string.Empty, Description = string.Empty };
+            selectedBands.Clear();
 
             await Task.Delay(1000);
             navigationManager.NavigateTo("/festivals");

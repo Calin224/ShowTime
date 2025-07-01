@@ -12,8 +12,8 @@ using STime.Data;
 namespace STime.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250627072137_ChangedConfigtdkf")]
-    partial class ChangedConfigtdkf
+    [Migration("20250630140415_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -48,8 +48,8 @@ namespace STime.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Genre")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Genre")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -57,7 +57,35 @@ namespace STime.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Band");
+                    b.ToTable("Bands");
+                });
+
+            modelBuilder.Entity("STime.Entities.Booking", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("FestivalId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FestivalId");
+
+                    b.ToTable("Bookings");
                 });
 
             modelBuilder.Entity("STime.Entities.Festival", b =>
@@ -72,7 +100,7 @@ namespace STime.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("EndDate")
+                    b.Property<DateTime?>("EndDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Location")
@@ -94,6 +122,32 @@ namespace STime.Migrations
                         });
                 });
 
+            modelBuilder.Entity("STime.Entities.FestivalPhoto", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("FestivalId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PublicId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FestivalId")
+                        .IsUnique();
+
+                    b.ToTable("FestivalPhoto");
+                });
+
             modelBuilder.Entity("BandFestival", b =>
                 {
                     b.HasOne("STime.Entities.Band", null)
@@ -107,6 +161,35 @@ namespace STime.Migrations
                         .HasForeignKey("FestivalsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("STime.Entities.Booking", b =>
+                {
+                    b.HasOne("STime.Entities.Festival", "Festival")
+                        .WithMany("Bookings")
+                        .HasForeignKey("FestivalId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Festival");
+                });
+
+            modelBuilder.Entity("STime.Entities.FestivalPhoto", b =>
+                {
+                    b.HasOne("STime.Entities.Festival", "Festival")
+                        .WithOne("FestivalPhoto")
+                        .HasForeignKey("STime.Entities.FestivalPhoto", "FestivalId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Festival");
+                });
+
+            modelBuilder.Entity("STime.Entities.Festival", b =>
+                {
+                    b.Navigation("Bookings");
+
+                    b.Navigation("FestivalPhoto");
                 });
 #pragma warning restore 612, 618
         }
