@@ -3,38 +3,102 @@
 @using STime.Data
 @using STime.Entities
 @using STime.Interfaces
-@inject DataContext context
 @inject IRepositoryFestival repo
+@inject IPhotoService photoService
 
-@if (festivals != null && festivals.Any())
+@if (festivals.Any())
 {
-    <MudDataGrid Items="festivals">
-        <Columns>
-            <PropertyColumn Property="x => x.Id"></PropertyColumn>
-            <PropertyColumn Property="x => x.Name"></PropertyColumn>
-            <PropertyColumn Property="x => x.Location"></PropertyColumn>
-            <PropertyColumn Property="x => x.StartDate"></PropertyColumn>
-            <PropertyColumn Property="x => x.EndDate"></PropertyColumn>
-            
-            <TemplateColumn Title="Bands">
-                <CellTemplate>
-                    @if (context.Item.Bands != null && context.Item.Bands.Any())
+    <MudTable Items="festivals" Hover="true" Breakpoint="Breakpoint.Sm">
+        <HeaderContent>
+            <MudTh>Id</MudTh>
+            <MudTh>Photo</MudTh>
+            <MudTh>Name</MudTh>
+            <MudTh>Location</MudTh>
+            <MudTh>Start Date</MudTh>
+            <MudTh>End Date</MudTh>
+            <MudTh>LineUp</MudTh>
+            <MudTh>Actions</MudTh>
+        </HeaderContent>
+
+        <RowTemplate>
+            @if (!edit)
+            {
+                <MudTh DataLabel="Id">@context.Id</MudTh>
+                <MudTh DataLabel="Photo">
+                    <MudTooltip>
+                        <ChildContent>
+                            <MudImage Src="@context.Url" Alt="Mony the dog" Elevation="25" Class="rounded-lg" Width="50"
+                                      Height="50"/>
+                        </ChildContent>
+                        <TooltipContent>
+                            <MudImage Src="@context.Url" Alt="Mony the dog" Elevation="25" Class="rounded-lg"
+                                      Width="200"
+                                      Height="200"/>
+                        </TooltipContent>
+                    </MudTooltip>
+                </MudTh>
+                <MudTh DataLabel="Name">@context.Name</MudTh>
+                <MudTh DataLabel="Location">@context.Location</MudTh>
+                <MudTh DataLabel="Start Date">@context.StartDate</MudTh>
+                <MudTh DataLabel="End Date">@context.EndDate</MudTh>
+                <MudTh DataLabel="LineUp">
+                    @foreach (var band in context.Bands)
                     {
-                        <div>
-                            @foreach (var band in context.Item.Bands)
-                            {
-                                <MudChip Size="Size.Small" Color="Color.Primary" Class="ma-1">@band.Name (@band.Genre)</MudChip>
-                            }
-                        </div>
+                        <MudChip T="string" Color="Color.Primary">@band.Name (@band.Genre)</MudChip>
                     }
-                    else
-                    {
-                        <MudText Typo="Typo.caption" Class="text-muted">No bands</MudText>
-                    }
-                </CellTemplate>
-            </TemplateColumn>
-        </Columns>
-    </MudDataGrid>
+                </MudTh>
+                <MudTh DataLabel="Actions">
+                    <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error"
+                               OnClick="() => DeleteFestival(context)">Delete
+                    </MudButton>
+
+                    <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Edit" Color="Color.Warning"
+                               @onclick="EditMode">Edit
+                    </MudButton>
+                </MudTh>
+            }
+            else
+            {
+                <MudTh DataLabel="Id">@context.Id</MudTh>
+                
+                <MudTh DataLabel="Photo">
+                    <MudFileUpload T="IBrowserFile" FilesChanged="(file) => UploadFiles(file, context)">
+                        <ActivatorContent>
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.CloudUpload">
+                                Upload Files
+                            </MudButton>
+                        </ActivatorContent>
+                    </MudFileUpload>
+                </MudTh>
+                
+                <MudTh DataLabel="Name">
+                    <MudTextField @bind-Value="context.Name" 
+                                  Immediate="true"
+                                  Label="Name"></MudTextField>
+                </MudTh>
+                
+                <MudTh DataLabel="Location">
+                    <MudTextField @bind-Value="context.Location"
+                                  Immediate="true"
+                                  Label="Location"></MudTextField>
+                </MudTh>
+                
+                <MudTh DataLabel="Description">
+                    <MudTextField @bind-Value="context.Description"
+                                  Immediate="true"
+                                  Label="Description"></MudTextField>
+                </MudTh>
+                
+                <MudTh DataLabel="Actions">
+                    <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error"
+                               @onclick="SaveFestivalChanges">Save
+                    </MudButton>
+                </MudTh>
+            }
+        </RowTemplate>
+    </MudTable>
 }
 else
 {
@@ -57,4 +121,45 @@ else
             Console.WriteLine($"Eroare la încărcarea festivalurilor: {ex.Message}");
         }
     }
+
+    private async Task LoadFestivals()
+    {
+        festivals = await repo.ListAllAsync();
+    }
+
+    private bool edit = false;
+
+    private async Task DeleteFestival(Festival festival)
+    {
+        repo.Delete(festival);
+
+        await photoService.DeletePhotoAsync(festival.PublicId);
+
+        if (await repo.SaveAsync())
+        {
+        }
+
+        await LoadFestivals();
+    }
+
+    private void EditMode()
+    {
+        edit = true;
+    }
+
+    private async Task UploadFiles(IBrowserFile file, Festival festival)
+    {
+        var results = await photoService.AddPhotosAsync(file);
+        foreach (var result in results)
+        {
+            festival.Url = result.SecureUrl.AbsoluteUri;
+            festival.PublicId = result.PublicId;
+        }
+    }
+
+    private async Task SaveFestivalChanges()
+    {
+        await repo.SaveAsync();
+    }
+
 }

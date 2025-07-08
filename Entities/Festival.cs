@@ -10,7 +10,8 @@ public class Festival : BaseEntity
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
     public string Description { get; set; } = string.Empty;
-    public FestivalPhoto? FestivalPhoto { get; set; }
+    public string? Url { get; set; }
+    public string? PublicId { get; set; }
 
     public ICollection<Band> Bands { get; set; } = [];
     public ICollection<Booking> Bookings { get; set; } = [];

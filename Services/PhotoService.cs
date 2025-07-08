@@ -1,6 +1,7 @@
 using System;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
+using Microsoft.AspNetCore.Components.Forms;
 using STime.Interfaces;
 
 namespace STime.Services;
@@ -16,29 +17,28 @@ public class PhotoService : IPhotoService
         _cloudinary = new Cloudinary(acc);
     }
 
-    public async Task<List<ImageUploadResult>> AddPhotosAsync(List<IFormFile> files)
+    public async Task<List<ImageUploadResult>> AddPhotosAsync(IBrowserFile? file)
     {
         var uploadResults = new List<ImageUploadResult>();
 
-        foreach (var file in files)
+
+        var uploadResult = new ImageUploadResult();
+
+        if (file.Size > 0)
         {
-            var uploadResult = new ImageUploadResult();
-
-            if (file.Length > 0)
+            using var stream = file.OpenReadStream();
+            var uploadParams = new ImageUploadParams
             {
-                using var stream = file.OpenReadStream();
-                var uploadParams = new ImageUploadParams
-                {
-                    File = new FileDescription(file.FileName, stream),
-                    Transformation = new Transformation().Gravity("face"),
-                    Folder = "da-net9"
-                };
+                File = new FileDescription(file.Name, stream),
+                Transformation = new Transformation().Gravity("face"),
+                Folder = "da-net9"
+            };
 
-                uploadResult = await _cloudinary.UploadAsync(uploadParams);
-            }
-
-            uploadResults.Add(uploadResult);
+            uploadResult = await _cloudinary.UploadAsync(uploadParams);
         }
+
+        uploadResults.Add(uploadResult);
+
 
         return uploadResults;
     }

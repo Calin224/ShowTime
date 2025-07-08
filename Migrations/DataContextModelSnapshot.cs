@@ -108,8 +108,14 @@ namespace STime.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("PublicId")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Url")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -117,32 +123,6 @@ namespace STime.Migrations
                         {
                             t.HasCheckConstraint("CK_Festival_StartDate_Future", "StartDate > GETDATE()");
                         });
-                });
-
-            modelBuilder.Entity("STime.Entities.FestivalPhoto", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("FestivalId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("PublicId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Url")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FestivalId")
-                        .IsUnique();
-
-                    b.ToTable("FestivalPhoto");
                 });
 
             modelBuilder.Entity("BandFestival", b =>
@@ -171,22 +151,9 @@ namespace STime.Migrations
                     b.Navigation("Festival");
                 });
 
-            modelBuilder.Entity("STime.Entities.FestivalPhoto", b =>
-                {
-                    b.HasOne("STime.Entities.Festival", "Festival")
-                        .WithOne("FestivalPhoto")
-                        .HasForeignKey("STime.Entities.FestivalPhoto", "FestivalId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Festival");
-                });
-
             modelBuilder.Entity("STime.Entities.Festival", b =>
                 {
                     b.Navigation("Bookings");
-
-                    b.Navigation("FestivalPhoto");
                 });
 #pragma warning restore 612, 618
         }

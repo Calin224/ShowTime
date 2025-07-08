@@ -1,10 +1,12 @@
 ﻿@page "/add-festival"
+@using Microsoft.AspNetCore.Http.HttpResults
 @using STime.Entities
 @using STime.Interfaces
 
 @inject IRepositoryFestival repo
 @inject NavigationManager navigationManager
 @inject IRepositoryBand repoBand
+@inject IPhotoService photoService
 
 <h3>Add Festival</h3>
 
@@ -22,12 +24,22 @@
                           Immediate="true"
                           Label="Description"></MudTextField>
             
+            <MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles">
+                <ActivatorContent>
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.CloudUpload">
+                        Upload Files
+                    </MudButton>
+                </ActivatorContent>
+            </MudFileUpload>
+            
             <MudDatePicker @bind-Date="Festival.StartDate" Label="Start date" />
             <MudDatePicker @bind-Date="Festival.EndDate" Label="End date" />
             
             <MudText Typo="Typo.h6" Class="mt-4 mb-2">Select Bands</MudText>
             
-            @if (availableBands != null && availableBands.Any())
+            @if (availableBands != null && availableBands.Any())    
             {
                 <MudSelect T="int" Label="Add Band" @bind-Value="selectedBandId" 
                            Placeholder="Choose a band to add">
@@ -110,6 +122,16 @@
     private void RemoveBandFromFestival(int bandId)
     {
         selectedBands.Remove(bandId);
+    }
+
+    private async Task UploadFiles(IBrowserFile? file)
+    {
+        var results = await photoService.AddPhotosAsync(file);
+        foreach (var result in results)
+        {
+            Festival.Url = result.SecureUrl.AbsoluteUri;
+            Festival.PublicId = result.PublicId;
+        }
     }
 
     private async Task AddFestivalEvent()
