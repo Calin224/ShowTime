@@ -6,160 +6,413 @@
 @inject IRepositoryFestival repo
 @inject IPhotoService photoService
 
-@if (festivals.Any())
-{
-    <MudTable Items="festivals" Hover="true" Breakpoint="Breakpoint.Sm">
-        <HeaderContent>
-            <MudTh>Id</MudTh>
-            <MudTh>Photo</MudTh>
-            <MudTh>Name</MudTh>
-            <MudTh>Location</MudTh>
-            <MudTh>Start Date</MudTh>
-            <MudTh>End Date</MudTh>
-            <MudTh>LineUp</MudTh>
-            <MudTh>Actions</MudTh>
-        </HeaderContent>
+<div class="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 py-12 px-4">
+    <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-8">
+            <div
+                class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-full mb-4">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                </svg>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Festival Collection</h1>
+            <p class="text-gray-600">Manage your music festival events</p>
+        </div>
 
-        <RowTemplate>
-            @if (!edit)
-            {
-                <MudTh DataLabel="Id">@context.Id</MudTh>
-                <MudTh DataLabel="Photo">
-                    <MudTooltip>
-                        <ChildContent>
-                            <MudImage Src="@context.Url" Alt="Mony the dog" Elevation="25" Class="rounded-lg" Width="50"
-                                      Height="50"/>
-                        </ChildContent>
-                        <TooltipContent>
-                            <MudImage Src="@context.Url" Alt="Mony the dog" Elevation="25" Class="rounded-lg"
-                                      Width="200"
-                                      Height="200"/>
-                        </TooltipContent>
-                    </MudTooltip>
-                </MudTh>
-                <MudTh DataLabel="Name">@context.Name</MudTh>
-                <MudTh DataLabel="Location">@context.Location</MudTh>
-                <MudTh DataLabel="Start Date">@context.StartDate</MudTh>
-                <MudTh DataLabel="End Date">@context.EndDate</MudTh>
-                <MudTh DataLabel="LineUp">
-                    @foreach (var band in context.Bands)
-                    {
-                        <MudChip T="string" Color="Color.Primary">@band.Name (@band.Genre)</MudChip>
-                    }
-                </MudTh>
-                <MudTh DataLabel="Actions">
-                    <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error"
-                               OnClick="() => DeleteFestival(context)">Delete
-                    </MudButton>
+        <div class="mb-6 flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <div class="bg-white rounded-xl px-4 py-2 shadow-sm">
+                    <span class="text-sm font-medium text-gray-600">Total Festivals: </span>
+                    <span class="text-sm font-bold text-purple-600">@festivals.Count</span>
+                </div>
+                @if (edit)
+                {
+                    <div class="bg-orange-100 border border-orange-200 rounded-xl px-4 py-2">
+                        <span class="text-sm font-medium text-orange-800">Edit Mode Active</span>
+                    </div>
+                }
+            </div>
 
-                    <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Edit" Color="Color.Warning"
-                               @onclick="EditMode">Edit
-                    </MudButton>
-                </MudTh>
-            }
-            else
-            {
-                <MudTh DataLabel="Id">@context.Id</MudTh>
-                
-                <MudTh DataLabel="Photo">
-                    <MudFileUpload T="IBrowserFile" FilesChanged="(file) => UploadFiles(file, context)">
-                        <ActivatorContent>
-                            <MudButton Variant="Variant.Filled"
-                                       Color="Color.Primary"
-                                       StartIcon="@Icons.Material.Filled.CloudUpload">
-                                Upload Files
-                            </MudButton>
-                        </ActivatorContent>
-                    </MudFileUpload>
-                </MudTh>
-                
-                <MudTh DataLabel="Name">
-                    <MudTextField @bind-Value="context.Name" 
-                                  Immediate="true"
-                                  Label="Name"></MudTextField>
-                </MudTh>
-                
-                <MudTh DataLabel="Location">
-                    <MudTextField @bind-Value="context.Location"
-                                  Immediate="true"
-                                  Label="Location"></MudTextField>
-                </MudTh>
-                
-                <MudTh DataLabel="Description">
-                    <MudTextField @bind-Value="context.Description"
-                                  Immediate="true"
-                                  Label="Description"></MudTextField>
-                </MudTh>
-                
-                <MudTh DataLabel="Actions">
-                    <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error"
-                               @onclick="SaveFestivalChanges">Save
-                    </MudButton>
-                </MudTh>
-            }
-        </RowTemplate>
-    </MudTable>
-}
-else
-{
-    <p>Nu există festivaluri disponibile.</p>
-}
+            <div class="flex space-x-3">
+                @if (edit)
+                {
+                    <button @onclick="CancelEdit"
+                            class="inline-flex items-center bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-xl focus:outline-none focus:ring-4 focus:ring-gray-500/50 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        Cancel Edit
+                    </button>
+                }
+                <a href="/add-festival"
+                   class="inline-flex items-center bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-semibold py-3 px-6 rounded-xl hover:from-purple-600 hover:to-indigo-700 focus:outline-none focus:ring-4 focus:ring-purple-500/50 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Add New Festival
+                </a>
+            </div>
+        </div>
+
+        @if (festivals.Count == 0)
+        {
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div class="p-12 text-center">
+                    <div class="inline-flex items-center justify-center w-20 h-20 bg-gray-100 rounded-full mb-6">
+                        <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">No festivals yet</h3>
+                    <p class="text-gray-600 mb-6">Start organizing events by adding your first festival!</p>
+                    <a href="/add-festival"
+                       class="inline-flex items-center bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-semibold py-3 px-6 rounded-xl hover:from-purple-600 hover:to-indigo-700 focus:outline-none focus:ring-4 focus:ring-purple-500/50 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                        Add Your First Festival
+                    </a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                @foreach (var festival in festivals)
+                {
+                    <div
+                        class="bg-white rounded-2xl shadow-xl overflow-hidden transform hover:scale-[1.02] transition-all duration-200">
+                        <div class="relative h-48 bg-gradient-to-br from-purple-400 to-indigo-600">
+                            @if (!string.IsNullOrEmpty(festival.Url))
+                            {
+                                <img src="@festival.Url" alt="@festival.Name" class="w-full h-full object-cover">
+                            }
+                            else
+                            {
+                                <div class="flex items-center justify-center h-full">
+                                    <svg class="w-16 h-16 text-white opacity-50" fill="none" stroke="currentColor"
+                                         viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                                    </svg>
+                                </div>
+                            }
+
+                            <div class="absolute top-3 left-3">
+                                <div
+                                    class="bg-black bg-opacity-50 text-white px-2 py-1 rounded-full text-sm font-medium">
+                                    #@festival.Id
+                                </div>
+                            </div>
+
+                            <div class="absolute top-3 right-3 flex space-x-2">
+                                @if (!edit)
+                                {
+                                    <button @onclick="() => EditMode(festival.Id)"
+                                            class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full shadow-lg transition-colors">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                        </svg>
+                                    </button>
+                                    <button @onclick="() => DeleteFestival(festival)"
+                                            class="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-lg transition-colors">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1-1v3M4 7h16"></path>
+                                        </svg>
+                                    </button>
+                                }
+                                else if (editingFestivalId == festival.Id)
+                                {
+                                    <MudFileUpload T="IBrowserFile"
+                                                   FilesChanged="(file) => UploadFiles(file, festival)">
+                                        <ActivatorContent>
+                                            <button
+                                                class="bg-green-500 hover:bg-green-600 text-white p-2 rounded-full shadow-lg transition-colors">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                     viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                          stroke-width="2"
+                                                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                                </svg>
+                                            </button>
+                                        </ActivatorContent>
+                                    </MudFileUpload>
+                                    <button @onclick="() => SaveFestivalChanges(festival)"
+                                            class="bg-green-500 hover:bg-green-600 text-white p-2 rounded-full shadow-lg transition-colors">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M5 13l4 4L19 7"></path>
+                                        </svg>
+                                    </button>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="p-6">
+                            @if (!edit || editingFestivalId != festival.Id)
+                            {
+                                <div class="mb-4">
+                                    <h3 class="text-xl font-bold text-gray-900 mb-2">@festival.Name</h3>
+                                    <div class="flex items-center text-gray-600 mb-2">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        </svg>
+                                        @festival.Location
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(festival.Description))
+                                    {
+                                        <p class="text-gray-600 text-sm mb-4">@festival.Description</p>
+                                    }
+                                </div>
+
+                                <!-- Dates -->
+                                <div class="mb-4 grid grid-cols-2 gap-4">
+                                    <div class="bg-gray-50 rounded-lg p-3">
+                                        <div class="text-xs font-medium text-gray-500 mb-1">START DATE</div>
+                                        <div class="text-sm font-semibold text-gray-900">
+                                            @(festival.StartDate?.ToString("MMM dd, yyyy") ?? "TBD")
+                                        </div>
+                                    </div>
+                                    <div class="bg-gray-50 rounded-lg p-3">
+                                        <div class="text-xs font-medium text-gray-500 mb-1">END DATE</div>
+                                        <div class="text-sm font-semibold text-gray-900">
+                                            @(festival.EndDate?.ToString("MMM dd, yyyy") ?? "TBD")
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @if (festival.Bands != null && festival.Bands.Any())
+                                {
+                                    <div>
+                                        <h4 class="text-sm font-semibold text-gray-900 mb-2 flex items-center">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
+                                                 viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                            </svg>
+                                            Lineup (@festival.Bands.Count bands)
+                                        </h4>
+                                        <div class="flex flex-wrap gap-2">
+                                            @foreach (var band in festival.Bands.Take(3))
+                                            {
+                                                <span
+                                                    class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-800">
+                                                    @band.Name
+                                                </span>
+                                            }
+                                            @if (festival.Bands.Count > 3)
+                                            {
+                                                <span
+                                                    class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                                    +@(festival.Bands.Count - 3) more
+                                                </span>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="text-center py-4 text-gray-500">
+                                        <svg class="mx-auto h-8 w-8 text-gray-400 mb-2" fill="none"
+                                             stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                        </svg>
+                                        <p class="text-sm">No bands added yet</p>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="space-y-4">
+                                    <MudTextField @bind-Value="festival.Name"
+                                                  Immediate="true"
+                                                  Label="Festival Name"
+                                                  Class="w-full"
+                                                  Style="--mud-palette-primary: #8b5cf6;"></MudTextField>
+
+                                    <MudTextField @bind-Value="festival.Location"
+                                                  Immediate="true"
+                                                  Label="Location"
+                                                  Class="w-full"
+                                                  Style="--mud-palette-primary: #8b5cf6;"></MudTextField>
+
+                                    <MudTextField @bind-Value="festival.Description"
+                                                  Immediate="true"
+                                                  Label="Description"
+                                                  Lines="2"
+                                                  Class="w-full"
+                                                  Style="--mud-palette-primary: #8b5cf6;"></MudTextField>
+                                    
+                                    <MudDatePicker @bind-Date="festival.StartDate"
+                                                   Label="Select start date"
+                                                   Variant="Variant.Outlined"
+                                                   Class="w-full"
+                                                   Style="--mud-palette-primary: #8b5cf6;"/>
+                                    
+                                    <MudDatePicker @bind-Date="festival.EndDate"
+                                                   Label="Select end date"
+                                                   Variant="Variant.Outlined"
+                                                   Class="w-full"
+                                                   Style="--mud-palette-primary: #8b5cf6;"/>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        @if (showDeleteSuccess)
+        {
+            <div class="mt-6 bg-green-50 border border-green-200 rounded-xl p-4">
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                              clip-rule="evenodd"></path>
+                    </svg>
+                    <p class="text-green-800 font-medium">Festival deleted successfully!</p>
+                </div>
+            </div>
+        }
+
+        @if (showError)
+        {
+            <div class="mt-6 bg-red-50 border border-red-200 rounded-xl p-4">
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 text-red-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                              clip-rule="evenodd"></path>
+                    </svg>
+                    <p class="text-red-800 font-medium">Error processing request. Please try again.</p>
+                </div>
+            </div>
+        }
+    </div>
+</div>
 
 @code {
-    public int Spacing { get; set; } = 6;
-
     IReadOnlyList<Festival> festivals = [];
+    private bool edit = false;
+    private int editingFestivalId = 0;
+    private bool showDeleteSuccess = false;
+    private bool showError = false;
 
     protected override async Task OnInitializedAsync()
     {
-        try
-        {
-            festivals = await repo.IncludeBands();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Eroare la încărcarea festivalurilor: {ex.Message}");
-        }
+        await LoadFestivals();
     }
 
     private async Task LoadFestivals()
     {
-        festivals = await repo.ListAllAsync();
+        try
+        {
+            showError = false;
+            festivals = await repo.IncludeBands();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading festivals: {ex.Message}");
+            showError = true;
+            StateHasChanged();
+        }
     }
-
-    private bool edit = false;
 
     private async Task DeleteFestival(Festival festival)
     {
-        repo.Delete(festival);
-
-        await photoService.DeletePhotoAsync(festival.PublicId);
-
-        if (await repo.SaveAsync())
+        try
         {
-        }
+            repo.Delete(festival);
 
-        await LoadFestivals();
+            if (!string.IsNullOrEmpty(festival.PublicId))
+            {
+                await photoService.DeletePhotoAsync(festival.PublicId);
+            }
+
+            if (await repo.SaveAsync())
+            {
+                showDeleteSuccess = true;
+                await LoadFestivals();
+
+                // Hide success message after 3 seconds
+                await Task.Delay(3000);
+                showDeleteSuccess = false;
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting festival: {ex.Message}");
+            showError = true;
+            StateHasChanged();
+        }
     }
 
-    private void EditMode()
+    private void EditMode(int festivalId)
     {
         edit = true;
+        editingFestivalId = festivalId;
+        StateHasChanged();
+    }
+
+    private void CancelEdit()
+    {
+        edit = false;
+        editingFestivalId = 0;
+        StateHasChanged();
     }
 
     private async Task UploadFiles(IBrowserFile file, Festival festival)
     {
-        var results = await photoService.AddPhotosAsync(file);
-        foreach (var result in results)
+        try
         {
-            festival.Url = result.SecureUrl.AbsoluteUri;
-            festival.PublicId = result.PublicId;
+            var results = await photoService.AddPhotosAsync(file);
+            foreach (var result in results)
+            {
+                festival.Url = result.SecureUrl.AbsoluteUri;
+                festival.PublicId = result.PublicId;
+            }
+
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error uploading file: {ex.Message}");
+            showError = true;
+            StateHasChanged();
         }
     }
 
-    private async Task SaveFestivalChanges()
+    private async Task SaveFestivalChanges(Festival festival)
     {
-        await repo.SaveAsync();
+        try
+        {
+            if (await repo.SaveAsync())
+            {
+                edit = false;
+                editingFestivalId = 0;
+                await LoadFestivals();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving festival: {ex.Message}");
+            showError = true;
+            StateHasChanged();
+        }
     }
 
 }

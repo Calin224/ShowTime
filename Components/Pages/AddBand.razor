@@ -5,51 +5,155 @@
 @inject IRepositoryBand repo
 @inject NavigationManager navigationManager
 
-<h3>Add Band</h3>
+<div class="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 py-12 px-4">
+    <div class="max-w-2xl mx-auto">
+        <div class="text-center mb-8">
+            <div
+                class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-full mb-4">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Add New Band</h1>
+            <p class="text-gray-600">Add a new band to your collection</p>
+        </div>
 
-<MudCard>
-    <MudForm Model="@Band">
-        <MudCardContent>
-            <MudTextField @bind-Value="Band.Name" Immediate="true" Label="Name"></MudTextField>
-            
-            <MudSelect T="Genre" @bind-Value="Band.Genre">
-                @foreach (Genre state in Enum.GetValues(typeof(Genre)))
-                {
-                    <MudSelectItem T="Genre" Value="@state">@state</MudSelectItem>
-                }
-            </MudSelect>
-            
-            <MudButton Variant="Variant.Filled" @onclick="AddBandEvent">Submit</MudButton>
-        </MudCardContent>
-    </MudForm>
-</MudCard>
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div class="p-8">
+                <MudForm Model="@Band">
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                <div class="flex items-center">
+                                    <svg class="w-4 h-4 text-purple-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                    </svg>
+                                    Band Name
+                                </div>
+                            </label>
+                            <MudTextField @bind-Value="Band.Name" 
+                                          Immediate="true" 
+                                          Label="Enter band name"
+                                          Variant="Variant.Outlined"
+                                          Class="w-full"
+                                          Style="--mud-palette-primary: #8b5cf6;"></MudTextField>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                <div class="flex items-center">
+                                    <svg class="w-4 h-4 text-purple-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                                    </svg>
+                                    Genre
+                                </div>
+                            </label>
+                            <MudSelect T="Genre" 
+                                       @bind-Value="Band.Genre"
+                                       Label="Select genre"
+                                       Variant="Variant.Outlined"
+                                       Class="w-full"
+                                       Style="--mud-palette-primary: #8b5cf6;">
+                                @foreach (Genre state in Enum.GetValues(typeof(Genre)))
+                                {
+                                    <MudSelectItem T="Genre" Value="@state">@state</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </div>
+
+                        <div class="flex justify-between items-center pt-6">
+                            <a href="/band-list"
+                               class="inline-flex items-center text-gray-600 hover:text-gray-800 font-medium py-2 px-4 rounded-lg hover:bg-gray-100 transition-colors">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                                </svg>
+                                Back to List
+                            </a>
+
+                            <MudButton Variant="Variant.Filled" 
+                                       @onclick="AddBandEvent"
+                                       Class="inline-flex items-center bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-semibold py-3 px-8 rounded-xl hover:from-purple-600 hover:to-indigo-700 focus:outline-none focus:ring-4 focus:ring-purple-500/50 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl"
+                                       Style="background: linear-gradient(135deg, #8b5cf6 0%, #4f46e5 100%); text-transform: none;">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                </svg>
+                                Add Band
+                            </MudButton>
+                        </div>
+                    </div>
+                </MudForm>
+            </div>
+        </div>
+
+        @if (showSuccess)
+        {
+            <div class="mt-6 bg-green-50 border border-green-200 rounded-xl p-4">
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                              clip-rule="evenodd"></path>
+                    </svg>
+                    <p class="text-green-800 font-medium">Band added successfully!</p>
+                </div>
+            </div>
+        }
+
+        @if (showError)
+        {
+            <div class="mt-6 bg-red-50 border border-red-200 rounded-xl p-4">
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 text-red-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                              clip-rule="evenodd"></path>
+                    </svg>
+                    <p class="text-red-800 font-medium">Error adding band. Please try again.</p>
+                </div>
+            </div>
+        }
+    </div>
+</div>
 
 @code {
-
     public Band Band { get; set; } = new Band
     {
         Name = string.Empty,
         Genre = 0
     };
 
-    private bool s = false;
+    private bool showSuccess = false;
+    private bool showError = false;
 
     private async Task AddBandEvent()
     {
         try
         {
+            showSuccess = false;
+            showError = false;
+            
             repo.Add(Band);
             if (await repo.SaveAsync())
-                s = true;
-
-            Band = new Band() { Name = string.Empty, Genre = 0};
-
-            await Task.Delay(1000);
-            navigationManager.NavigateTo("/band-list");
+            {
+                showSuccess = true;
+                StateHasChanged();
+                
+                Band = new Band() { Name = string.Empty, Genre = 0 };
+                
+                await Task.Delay(1500);
+                navigationManager.NavigateTo("/band-list");
+            }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error adding festival: {ex.Message}");
+            Console.WriteLine($"Error adding band: {ex.Message}");
+            showError = true;
+            StateHasChanged();
         }
     }
 }
